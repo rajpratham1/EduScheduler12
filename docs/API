@@ -1,0 +1,25 @@
+# API Documentation
+
+## Authentication
+- Handled via Firebase Authentication (JWT-based).
+
+## Endpoints
+
+### Health
+`GET /api/health`
+- Returns `{ status: 'ok' }`
+
+### Classes
+- `GET /api/classes` → list all classes
+- `POST /api/classes` → create new class
+
+### Gemini Suggestion
+- `POST /api/gemini/suggest-schedule`
+  - Body: `{ "classes": [...], "faculty": [...] }`
+  - Returns AI-generated timetable
+
+### Notifications
+- `POST /api/register-token` → store device token
+- `POST /api/notifications/send` → send notification (admin only)
+
+---
