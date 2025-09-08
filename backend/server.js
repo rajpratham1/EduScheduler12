@@ -1,41 +1,41 @@
 /**
- * Simple Express backend for EduScheduler
- * - Provides REST endpoints for schedules and users
- * - Uses Firebase Admin SDK (placeholder). To enable:
- *   1) Place your Firebase service account JSON at backend/serviceAccountKey.json
- *   2) Run `npm install express firebase-admin cors body-parser`
- *   3) Start with `node server.js`
+ * Express backend for EduScheduler
+ * - Provides REST endpoints for schedules, reviews, and settings
+ * - Uses Firebase Admin SDK if service account is present
  */
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const admin = require('firebase-admin');
-const fs = require('fs');
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import admin from 'firebase-admin';
+import fs from 'fs';
+import fetch from 'node-fetch';
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
 // Initialize Firebase Admin if service account exists
-const serviceAccountPath = __dirname + '/serviceAccountKey.json';
+const serviceAccountPath = new URL('./serviceAccountKey.json', import.meta.url).pathname;
+
 if (fs.existsSync(serviceAccountPath)) {
-  const serviceAccount = require(serviceAccountPath);
+  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://<YOUR_FIREBASE_PROJECT>.firebaseio.com"
+    databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
   });
-  console.log('Firebase Admin initialized.');
+  console.log('✅ Firebase Admin initialized.');
 } else {
-  console.log('Warning: Firebase service account key not found. Create backend/serviceAccountKey.json to enable Firebase.');
+  console.log('⚠️ Warning: Firebase service account key not found. Create backend/serviceAccountKey.json to enable Firebase.');
 }
 
 // Example in-memory store (fallback if Firebase not configured)
 let schedules = [];
 
+// ================== ROUTES ==================
+
 // GET schedules
 app.get('/api/schedules', async (req, res) => {
-  // If firebase is initialized, fetch from Firestore
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
@@ -68,22 +68,22 @@ app.post('/api/schedules', async (req, res) => {
   res.json({ id: payload.id });
 });
 
-const PORT = process.env.PORT || 4000;
-
-// Use node-fetch to forward review submissions to Formspree or external services
-const fetch = require('node-fetch');
-
-// POST review -> store in Firestore (if available) and forward to Formspree
+// POST review
 app.post('/api/review', async (req, res) => {
   const payload = req.body || {};
-  // Save to Firestore if available
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
-      const doc = await db.collection('reviews').add({ ...payload, status: 'pending', createdAt: Date.now() });
-      // Forward to Formspree (token-based). Replace with your formspree endpoint if different.
+      const doc = await db.collection('reviews').add({
+        ...payload,
+        status: 'pending',
+        createdAt: Date.now()
+      });
+
+      // Forward to Formspree (optional)
       const formspreeToken = process.env.FORMSPREE_TOKEN || 'xvgrnpyb';
       const formspreeEndpoint = `https://formspree.io/${formspreeToken}`;
+
       try {
         await fetch(formspreeEndpoint, {
           method: 'POST',
@@ -96,23 +96,26 @@ app.post('/api/review', async (req, res) => {
           })
         });
       } catch (e) {
-        console.warn('Formspree forward failed:', e.message || e);
+        console.warn('⚠️ Formspree forward failed:', e.message || e);
       }
+
       return res.json({ id: doc.id });
     } catch (e) {
-      console.error('Firestore review save failed', e);
+      console.error('❌ Firestore review save failed', e);
       return res.status(500).json({ error: 'Firestore error' });
     }
   } else {
-    // If Firestore not configured, simply echo back
     return res.json({ id: Date.now() });
   }
 });
 
-// Endpoint to update schedule_config (days/times)
+// Update schedule_config
 app.post('/api/settings/schedule_config', async (req, res) => {
   const { days, times } = req.body || {};
-  if (!Array.isArray(days) || !Array.isArray(times)) return res.status(400).json({ error: 'days and times arrays required' });
+  if (!Array.isArray(days) || !Array.isArray(times)) {
+    return res.status(400).json({ error: 'days and times arrays required' });
+  }
+
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
@@ -126,4 +129,8 @@ app.post('/api/settings/schedule_config', async (req, res) => {
     return res.json({ ok: true, note: 'Firestore not configured' });
   }
 });
-app.listen(PORT, () => console.log('Server running on port', PORT));
+
+// ============================================
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
