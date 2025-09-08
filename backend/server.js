@@ -85,7 +85,6 @@ app.post("/api/review", async (req, res) => {
         .collection("reviews")
         .add({ ...payload, status: "pending", createdAt: Date.now() });
 
-      // Forward to Formspree
       const formspreeToken = process.env.FORMSPREE_TOKEN || "xvgrnpyb";
       const formspreeEndpoint = `https://formspree.io/${formspreeToken}`;
       try {
@@ -137,12 +136,12 @@ app.post("/api/settings/schedule_config", async (req, res) => {
 
 // ================= Frontend =================
 
-// Serve static files from React build
+// Serve static files from Vite build
 app.use(express.static(path.join(__dirname, "dist")));
 
 // Fallback for React Router
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "dist/index.html"));
 });
 
 // ================= Start Server =================
