@@ -1,5 +1,10 @@
 /**
- * EduScheduler Express Backend + Frontend
+ * Simple Express backend for EduScheduler
+ * - Provides REST endpoints for schedules and users
+ * - Uses Firebase Admin SDK (placeholder). To enable:
+ *   1) Place your Firebase service account JSON at backend/serviceAccountKey.json
+ *   2) Run `npm install express firebase-admin cors body-parser`
+ *   3) Start with `node server.js`
  */
 
 const express = require('express');
@@ -7,14 +12,13 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const fs = require('fs');
-const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// ======================= Firebase Setup =======================
-const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+// Initialize Firebase Admin if service account exists
+const serviceAccountPath = __dirname + '/serviceAccountKey.json';
 if (fs.existsSync(serviceAccountPath)) {
   const serviceAccount = require(serviceAccountPath);
   admin.initializeApp({
@@ -23,16 +27,15 @@ if (fs.existsSync(serviceAccountPath)) {
   });
   console.log('Firebase Admin initialized.');
 } else {
-  console.log('⚠️ Firebase service account key not found. Backend will run without Firestore.');
+  console.log('Warning: Firebase service account key not found. Create backend/serviceAccountKey.json to enable Firebase.');
 }
 
-// ======================= In-memory Fallback =======================
+// Example in-memory store (fallback if Firebase not configured)
 let schedules = [];
-
-// ======================= API Routes =======================
 
 // GET schedules
 app.get('/api/schedules', async (req, res) => {
+  // If firebase is initialized, fetch from Firestore
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
@@ -65,15 +68,20 @@ app.post('/api/schedules', async (req, res) => {
   res.json({ id: payload.id });
 });
 
-// POST review
+const PORT = process.env.PORT || 4000;
+
+// Use node-fetch to forward review submissions to Formspree or external services
+const fetch = require('node-fetch');
+
+// POST review -> store in Firestore (if available) and forward to Formspree
 app.post('/api/review', async (req, res) => {
   const payload = req.body || {};
+  // Save to Firestore if available
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
       const doc = await db.collection('reviews').add({ ...payload, status: 'pending', createdAt: Date.now() });
-
-      // Forward to Formspree
+      // Forward to Formspree (token-based). Replace with your formspree endpoint if different.
       const formspreeToken = process.env.FORMSPREE_TOKEN || 'xvgrnpyb';
       const formspreeEndpoint = `https://formspree.io/${formspreeToken}`;
       try {
@@ -90,23 +98,21 @@ app.post('/api/review', async (req, res) => {
       } catch (e) {
         console.warn('Formspree forward failed:', e.message || e);
       }
-
       return res.json({ id: doc.id });
     } catch (e) {
       console.error('Firestore review save failed', e);
       return res.status(500).json({ error: 'Firestore error' });
     }
   } else {
+    // If Firestore not configured, simply echo back
     return res.json({ id: Date.now() });
   }
 });
 
-// Update schedule_config
+// Endpoint to update schedule_config (days/times)
 app.post('/api/settings/schedule_config', async (req, res) => {
   const { days, times } = req.body || {};
-  if (!Array.isArray(days) || !Array.isArray(times)) {
-    return res.status(400).json({ error: 'days and times arrays required' });
-  }
+  if (!Array.isArray(days) || !Array.isArray(times)) return res.status(400).json({ error: 'days and times arrays required' });
   if (admin.apps.length) {
     try {
       const db = admin.firestore();
@@ -120,15 +126,4 @@ app.post('/api/settings/schedule_config', async (req, res) => {
     return res.json({ ok: true, note: 'Firestore not configured' });
   }
 });
-
-// ======================= Serve Frontend =======================
-const distPath = path.join(__dirname, 'dist');
-app.use(express.static(distPath));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
-
-// ======================= Start Server =======================
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log('Server running on port', PORT));
