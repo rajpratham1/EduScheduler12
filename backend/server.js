@@ -13,11 +13,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fetch from "node-fetch";
 
+// ================= Setup =================
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Path helpers (for __dirname in ESM)
+// Fix __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -31,9 +32,7 @@ if (fs.existsSync(serviceAccountPath)) {
   });
   console.log("✅ Firebase Admin initialized.");
 } else {
-  console.log(
-    "⚠️ Firebase service account key not found. Create serviceAccountKey.json if needed."
-  );
+  console.log("⚠️ No serviceAccountKey.json found. Using in-memory storage.");
 }
 
 // ================= In-memory fallback =================
@@ -50,7 +49,7 @@ app.get("/api/schedules", async (req, res) => {
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       return res.json(data);
     } catch (e) {
-      console.error(e);
+      console.error("❌ Firebase error:", e);
       return res.status(500).json({ error: "Firebase error" });
     }
   }
@@ -66,7 +65,7 @@ app.post("/api/schedules", async (req, res) => {
       const doc = await db.collection("schedules").add(payload);
       return res.json({ id: doc.id });
     } catch (e) {
-      console.error(e);
+      console.error("❌ Firebase error:", e);
       return res.status(500).json({ error: "Firebase error" });
     }
   }
@@ -85,6 +84,7 @@ app.post("/api/review", async (req, res) => {
         .collection("reviews")
         .add({ ...payload, status: "pending", createdAt: Date.now() });
 
+      // Forward to Formspree
       const formspreeToken = process.env.FORMSPREE_TOKEN || "xvgrnpyb";
       const formspreeEndpoint = `https://formspree.io/${formspreeToken}`;
       try {
@@ -104,9 +104,10 @@ app.post("/api/review", async (req, res) => {
       } catch (e) {
         console.warn("⚠️ Formspree forward failed:", e.message || e);
       }
+
       return res.json({ id: doc.id });
     } catch (e) {
-      console.error("❌ Firestore review save failed", e);
+      console.error("❌ Firestore review save failed:", e);
       return res.status(500).json({ error: "Firestore error" });
     }
   } else {
@@ -117,8 +118,9 @@ app.post("/api/review", async (req, res) => {
 // POST settings
 app.post("/api/settings/schedule_config", async (req, res) => {
   const { days, times } = req.body || {};
-  if (!Array.isArray(days) || !Array.isArray(times))
+  if (!Array.isArray(days) || !Array.isArray(times)) {
     return res.status(400).json({ error: "days and times arrays required" });
+  }
 
   if (admin.apps.length) {
     try {
@@ -134,6 +136,11 @@ app.post("/api/settings/schedule_config", async (req, res) => {
   }
 });
 
+// Example simple API
+app.get("/api/hello", (req, res) => {
+  res.json({ message: "Hello from EduScheduler backend!" });
+});
+
 // ================= Frontend =================
 
 // Serve static files from Vite build
@@ -141,7 +148,7 @@ app.use(express.static(path.join(__dirname, "dist")));
 
 // Fallback for React Router
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist/index.html"));
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 // ================= Start Server =================
