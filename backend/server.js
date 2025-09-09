@@ -160,13 +160,11 @@ Return a JSON array of classes with suggestedSlot fields.`;
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
 });
 
-// Serve the static frontend build
-const frontendDistPath = path.join(__dirname, '../../dist');
-app.use(express.static(frontendDistPath));
+// Correctly serve static files from the root dist folder
+app.use(express.static(path.join(__dirname, '..', '..', 'dist')));
 
-// Fallback for React Router
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendDistPath, 'index.html'));
+  res.sendFile(path.join(__dirname, '..', '..', 'dist', 'index.html'));
 });
 
 const port = process.env.PORT || 8080;
