@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, getDocs } from "firebase/firestore";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut, User, ConfirmationResult } from "firebase/auth";
-import { getAnalytics, isSupported } from "firebase/analytics"; // Import getAnalytics and isSupported
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 /**
  * Firebase client initialization.
