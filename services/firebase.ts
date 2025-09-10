@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, getDocs } from "firebase/firestore";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut, User, ConfirmationResult } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics"; // Import getAnalytics and isSupported
 
 /**
  * Firebase client initialization.
@@ -19,6 +20,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// CONDITIONAL ANALYTICS INITIALIZATION
+let analytics;
+// Check if Analytics is supported before initializing
+async function initializeAnalytics() {
+    if (await isSupported()) {
+        analytics = getAnalytics(app);
+    }
+}
+initializeAnalytics();
 
 /* ---------- Auth helpers (Phone OTP using Firebase Auth) ---------- */
 
