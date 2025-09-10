@@ -1,13 +1,17 @@
-
-// Express backend with Firebase Admin, Gemini placeholder, and FCM endpoints
-const express = require('express');
-const admin = require('firebase-admin');
-const cors = require('cors');
-const fetch = require('node-fetch');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import admin from 'firebase-admin';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Firebase Admin if service account provided
 let db = null;
@@ -129,7 +133,7 @@ app.post('/api/gemini/suggest-schedule', verifyToken, async (req, res) => {
     }
 
     // Prepare prompt
-    const prompt = `You are an assistant that generates a weekly timetable. 
+    const prompt = `You are an assistant that generates a weekly timetable.
 Classes: ${JSON.stringify(classes)}
 Constraints: ${JSON.stringify(constraints || {})}
 Return a JSON array of classes with suggestedSlot fields.`;
@@ -154,6 +158,13 @@ Return a JSON array of classes with suggestedSlot fields.`;
     }
     res.json({ source: 'gemini', raw: data, suggestion });
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
+});
+
+// Correctly serve static files from the root dist folder
+app.use(express.static(path.join(__dirname, '..', '..', 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'dist', 'index.html'));
 });
 
 const port = process.env.PORT || 8080;
