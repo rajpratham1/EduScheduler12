@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/api/client.ts b/EduScheduler/frontend/src/api/client.ts
---- a/EduScheduler/frontend/src/api/client.ts
-+++ b/EduScheduler/frontend/src/api/client.ts
-@@ -0,0 +1,16 @@
+
 +import axios from 'axios'
 +import { auth } from '@/firebase'
 +
