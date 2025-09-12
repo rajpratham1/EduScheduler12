@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/App.tsx b/EduScheduler/frontend/src/App.tsx
---- a/EduScheduler/frontend/src/App.tsx
-+++ b/EduScheduler/frontend/src/App.tsx
-@@ -0,0 +1,50 @@
+
 +import { useEffect } from 'react'
 +import { Routes, Route, Link } from 'react-router-dom'
 +import { useAuth } from '@/store/auth'
