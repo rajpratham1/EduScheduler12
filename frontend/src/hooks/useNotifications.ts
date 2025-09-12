@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/hooks/useNotifications.ts b/EduScheduler/frontend/src/hooks/useNotifications.ts
---- a/EduScheduler/frontend/src/hooks/useNotifications.ts
-+++ b/EduScheduler/frontend/src/hooks/useNotifications.ts
-@@ -0,0 +1,25 @@
+
 +import { useEffect, useRef, useState } from 'react'
 +import { auth } from '@/firebase'
 +
