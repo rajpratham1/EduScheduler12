@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/store/auth.ts b/EduScheduler/frontend/src/store/auth.ts
---- a/EduScheduler/frontend/src/store/auth.ts
-+++ b/EduScheduler/frontend/src/store/auth.ts
-@@ -0,0 +1,34 @@
+
 +import { create } from 'zustand'
 +import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth'
 +import { auth, googleProvider } from '@/firebase'
