@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/main.tsx b/EduScheduler/frontend/src/main.tsx
---- a/EduScheduler/frontend/src/main.tsx
-+++ b/EduScheduler/frontend/src/main.tsx
-@@ -0,0 +1,19 @@
+
 +import React from 'react'
 +import ReactDOM from 'react-dom/client'
 +import { BrowserRouter } from 'react-router-dom'
