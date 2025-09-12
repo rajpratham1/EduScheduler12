@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/components/ui/Button.tsx b/EduScheduler/frontend/src/components/ui/Button.tsx
---- a/EduScheduler/frontend/src/components/ui/Button.tsx
-+++ b/EduScheduler/frontend/src/components/ui/Button.tsx
-@@ -0,0 +1,17 @@
+
 +import { motion } from 'framer-motion'
 +import { clsx } from 'clsx'
 +import { ButtonHTMLAttributes } from 'react'
