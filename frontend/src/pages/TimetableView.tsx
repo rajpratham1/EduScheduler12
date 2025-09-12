@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/pages/TimetableView.tsx b/EduScheduler/frontend/src/pages/TimetableView.tsx
---- a/EduScheduler/frontend/src/pages/TimetableView.tsx
-+++ b/EduScheduler/frontend/src/pages/TimetableView.tsx
-@@ -0,0 +1,22 @@
+
 +import { useQuery } from '@tanstack/react-query'
 +import api from '@/api/client'
 +
