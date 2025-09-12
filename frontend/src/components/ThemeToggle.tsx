@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/components/ThemeToggle.tsx b/EduScheduler/frontend/src/components/ThemeToggle.tsx
---- a/EduScheduler/frontend/src/components/ThemeToggle.tsx
-+++ b/EduScheduler/frontend/src/components/ThemeToggle.tsx
-@@ -0,0 +1,16 @@
+
 +import { useEffect, useState } from 'react'
 +
 +export default function ThemeToggle() {
