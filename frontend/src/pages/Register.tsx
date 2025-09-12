@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/pages/Register.tsx b/EduScheduler/frontend/src/pages/Register.tsx
---- a/EduScheduler/frontend/src/pages/Register.tsx
-+++ b/EduScheduler/frontend/src/pages/Register.tsx
-@@ -0,0 +1,22 @@
+
 +import { motion } from 'framer-motion'
 +import { useAuth } from '@/store/auth'
 +
