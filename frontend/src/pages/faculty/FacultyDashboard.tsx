@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/src/pages/faculty/FacultyDashboard.tsx b/EduScheduler/frontend/src/pages/faculty/FacultyDashboard.tsx
---- a/EduScheduler/frontend/src/pages/faculty/FacultyDashboard.tsx
-+++ b/EduScheduler/frontend/src/pages/faculty/FacultyDashboard.tsx
-@@ -0,0 +1,34 @@
+
 +import { useState } from 'react'
 +import api from '@/api/client'
 +import TimetableView from '@/pages/TimetableView'
