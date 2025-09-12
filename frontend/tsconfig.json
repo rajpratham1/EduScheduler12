@@ -1,8 +1,4 @@
-(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-diff --git a/EduScheduler/frontend/tsconfig.json b/EduScheduler/frontend/tsconfig.json
---- a/EduScheduler/frontend/tsconfig.json
-+++ b/EduScheduler/frontend/tsconfig.json
-@@ -0,0 +1,22 @@
+
 +{
 +  "compilerOptions": {
 +    "target": "ES2020",
